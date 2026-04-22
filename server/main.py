@@ -9,6 +9,12 @@ from models.entity import User, Role
 from models.base import Base
 from core.security import get_password_hash
 from sqlalchemy.future import select
+from sqlalchemy import text
+import time
+import platform
+import os
+
+_start_time = time.time()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -69,3 +75,62 @@ app.include_router(chatbot.router, prefix=f"{settings.API_V1_STR}/chatbot", tags
 @app.get("/")
 def root():
     return {"message": "Welcome to Agro-Tech API"}
+
+@app.get("/health", tags=["health"])
+async def health_check():
+    """Detailed server health check endpoint."""
+    uptime_seconds = time.time() - _start_time
+    days, remainder = divmod(int(uptime_seconds), 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    # Database connectivity
+    db_status = "healthy"
+    db_latency_ms = None
+    try:
+        db_start = time.time()
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+        db_latency_ms = round((time.time() - db_start) * 1000, 2)
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
+
+    # Service integration status (non-intrusive checks)
+    services = {
+        "razorpay": "configured" if settings.RAZORPAY_KEY_ID and settings.RAZORPAY_KEY_ID != "rzp_test_your_key_id" else "not_configured",
+        "gemini_ai": "configured" if settings.GEMINI_API_KEY else "not_configured",
+        "cloudinary": "configured" if settings.CLOUDINARY_CLOUD_NAME else "not_configured",
+    }
+
+    # Memory info (cross-platform via /proc on Linux, fallback otherwise)
+    memory_mb = None
+    try:
+        import resource
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        memory_mb = round(usage.ru_maxrss / 1024, 2)  # Linux: KB -> MB
+    except Exception:
+        pass
+
+    overall_status = "healthy" if db_status == "healthy" else "degraded"
+
+    return {
+        "status": overall_status,
+        "project": settings.PROJECT_NAME,
+        "uptime": f"{days}d {hours}h {minutes}m {seconds}s",
+        "uptime_seconds": round(uptime_seconds, 2),
+        "server": {
+            "python_version": platform.python_version(),
+            "os": f"{platform.system()} {platform.release()}",
+            "architecture": platform.machine(),
+            "pid": os.getpid(),
+            "memory_mb": memory_mb,
+        },
+        "database": {
+            "status": db_status,
+            "latency_ms": db_latency_ms,
+        },
+        "services": services,
+        "api_version": settings.API_V1_STR,
+        "cors_origins": settings.cors_origins_list,
+    }
+
