@@ -28,7 +28,7 @@ export function useNotifications() {
         vibrate: [200, 100, 200],
         tag: 'new-booking',
         renotify: true,
-        data: { url: '/dashboard/employee/bookings' }
+        data: { url: '/dashboard/provider/bookings' }
       } as any);
     } else {
       new Notification(title, { body });
@@ -36,10 +36,10 @@ export function useNotifications() {
   };
 
   const checkNewBookings = async () => {
-    if (!token || user?.role !== 'employee') return;
+    if (!token || (user?.role !== 'provider' && user?.role !== 'labour')) return;
 
     try {
-      const res = await apiClient.get('/employee/bookings');
+      const res = await apiClient.get('/provider/bookings');
       const bookings = res.data;
       
       if (!bookings || bookings.length === 0) return;
@@ -65,7 +65,7 @@ export function useNotifications() {
   };
 
   useEffect(() => {
-    if (user?.role === 'employee' && token) {
+    if ((user?.role === 'provider' || user?.role === 'labour') && token) {
       requestPermission();
       
       // Initial check
