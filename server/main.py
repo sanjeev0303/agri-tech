@@ -10,6 +10,7 @@ from models.base import Base
 from core.security import get_password_hash
 from sqlalchemy.future import select
 from sqlalchemy import text
+import asyncio
 import time
 import platform
 import os
@@ -18,21 +19,34 @@ _start_time = time.time()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(select(User).where(User.email == "agro81021@test.com"))
-        admin_user = result.scalar_one_or_none()
-        if not admin_user:
-            new_admin = User(
-                email="agro81021@test.com",
-                hashed_password=get_password_hash("agro@81021"),
-                role=Role.superadmin,
-                is_active=True
-            )
-            session.add(new_admin)
-            await session.commit()
+    # Retry database connection on startup (helpful for Neon cold starts)
+    max_retries = 3
+    retry_delay = 2
+    for attempt in range(max_retries):
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            
+            async with AsyncSessionLocal() as session:
+                result = await session.execute(select(User).where(User.email == "agro81021@test.com"))
+                admin_user = result.scalar_one_or_none()
+                if not admin_user:
+                    new_admin = User(
+                        email="agro81021@test.com",
+                        hashed_password=get_password_hash("agro@81021"),
+                        role=Role.superadmin,
+                        is_active=True
+                    )
+                    session.add(new_admin)
+                    await session.commit()
+            break # Success!
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"Database connection attempt {attempt + 1} failed: {e}. Retrying in {retry_delay}s...")
+                await asyncio.sleep(retry_delay)
+            else:
+                print(f"Database connection failed after {max_retries} attempts. Exiting.")
+                raise e
     yield
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
