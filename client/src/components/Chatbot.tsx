@@ -29,17 +29,24 @@ export function Chatbot() {
     }
   }, [messages, isOpen]);
 
-  const handleSend = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const suggestions = [
+    { label: "🚜 How to rent equipment?", value: "I want to rent some agricultural equipment. How does the process work?" },
+    { label: "👨‍🌾 Hire professional labour", value: "How can I hire professional labour for my farm through Agro-Tech?" },
+    { label: "📊 Show platform statistics", value: "Can you show me the current platform statistics like total users and equipment listed?" },
+    { label: "❓ About Agro-Tech", value: "What is Agro-Tech and how can it help me as a farmer?" },
+  ];
 
-    const userMsg: ChatMessage = { role: 'user', content: input.trim() };
+  const handleSend = async (e?: React.FormEvent, customInput?: string) => {
+    e?.preventDefault();
+    const messageContent = customInput || input.trim();
+    if (!messageContent || isLoading) return;
+
+    const userMsg: ChatMessage = { role: 'user', content: messageContent };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
 
     try {
-      // Send entire history (except the initial greeting if we want, but it's fine to send it)
       const res = await apiClient.post('/chatbot', {
         messages: [...messages, userMsg]
       });
@@ -131,6 +138,21 @@ export function Chatbot() {
               )}
               <div ref={messagesEndRef} />
             </div>
+
+            {/* Suggestions */}
+            {messages.length <= 1 && (
+              <div className="px-4 pb-2 flex flex-wrap gap-2">
+                {suggestions.map((s, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSend(undefined, s.value)}
+                    className="text-[11px] font-medium bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded-full border border-primary/20 transition-all hover:scale-105 active:scale-95"
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Input */}
             <div className="p-3 bg-background border-t">

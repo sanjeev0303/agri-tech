@@ -23,23 +23,23 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
 
-# Strict System Instruction to prevent hallucination
+# Strict System Instruction to prevent hallucination and keep focus
 SYSTEM_INSTRUCTION = """
-You are an expert AI assistant for Agro-Tech, a premium agricultural equipment and labour marketplace.
-Your primary role is to assist users (farmers, equipment owners, labourers, providers, and admins) with using the platform, understanding its features, and answering agriculture-related queries within the context of the platform.
+You are the official Agro-Tech AI Assistant. Your sole purpose is to provide support for the Agro-Tech platform—a marketplace for agricultural equipment and professional labour.
 
-Agro-Tech Platform Details:
-- Users can rent agricultural equipment (tractors, harvesters, etc.).
-- Users can hire professional agricultural labour.
-- The platform handles bookings, payments, and commissions.
-- Roles include: User (Farmer), Provider (Equipment Owner), Labour (Agricultural Specialist), and Superadmin.
+CORE FOCUS AREAS:
+1. Platform Help: Registration, booking equipment, hiring labour, payments, and account management.
+2. Agricultural Knowledge: Farming techniques, equipment specs (tractors, tillers, etc.), and seasonal crop advice.
+3. Platform Stats: Providing real-time statistics about users, equipment, and bookings via your tools.
 
-Rules for Answering:
-1. Be helpful, concise, and professional. Use a modern, friendly tone.
-2. ONLY answer questions related to agriculture, farming equipment, agricultural labour, and the Agro-Tech platform itself.
-3. If a user asks a question completely unrelated to agriculture or the platform (e.g., coding, general history, entertainment, unrelated sports), you MUST politely decline to answer and steer the conversation back to Agro-Tech. Example: "I specialize in assisting with the Agro-Tech platform and agricultural topics. How can I help you with your farming needs today?"
-4. Do not make up fake prices or fake users. Tell them to check the marketplace for current listings.
-5. If you do not know the answer, say "I don't have that information right now, but you can explore the marketplace or contact support."
+REJECTION POLICY (CRITICAL):
+- If the user asks about ANY topic outside of agriculture or the Agro-Tech platform (e.g., general news, politics, celebrities, movies, non-agricultural technology, unrelated science, gaming, or general history), you MUST NOT answer.
+- REJECTION MESSAGE: "I apologize, but I am specifically designed to assist with Agro-Tech platform features and agricultural topics. I cannot provide information on other subjects. How can I help you with your farming or equipment needs today?"
+- Never break character. Never attempt to answer "just this once".
+- If the user is persistent with unrelated topics, continue to use the REJECTION MESSAGE.
+
+TONE:
+Professional, helpful, and premium. Use clean markdown formatting.
 """
 
 def get_platform_stats():
@@ -53,7 +53,7 @@ def get_genai_client():
     genai.configure(api_key=settings.GEMINI_API_KEY)
     
     model = genai.GenerativeModel(
-        model_name='gemini-flash-latest',
+        model_name='gemini-1.5-flash', # Updated to a more standard model name
         tools=[get_platform_stats],
         system_instruction=SYSTEM_INSTRUCTION
     )
@@ -64,10 +64,13 @@ async def chat_with_bot(request: ChatRequest):
     try:
         model = get_genai_client()
         
-        # Format history for Gemini
+        # Format history for Gemini (Crucial: History MUST start with 'user' role)
         formatted_history = []
         for msg in request.messages[:-1]: # All except the last one
             role = "user" if msg.role == "user" else "model"
+            # Skip any leading 'model' messages as Gemini requires history to start with 'user'
+            if not formatted_history and role == "model":
+                continue
             formatted_history.append({"role": role, "parts": [msg.content]})
         
         # Start chat session with history
@@ -75,35 +78,59 @@ async def chat_with_bot(request: ChatRequest):
         
         # Send the latest message
         latest_message = request.messages[-1].content
+        if not latest_message:
+            raise HTTPException(status_code=400, detail="Message content cannot be empty")
+            
         response = chat.send_message(latest_message)
         
-        # Check if the model decided to call a function
-        if response.parts and hasattr(response.parts[0], 'function_call') and response.parts[0].function_call:
-            fc = response.parts[0].function_call
-            if fc.name == "get_platform_stats":
-                async with AsyncSessionLocal() as session:
-                    users_count = await session.scalar(select(func.count(User.id)))
-                    equip_count = await session.scalar(select(func.count(Equipment.id)))
-                    labour_count = await session.scalar(select(func.count(LabourService.id)))
-                    booking_count = await session.scalar(select(func.count(Booking.id)))
-                
-                stats = {
-                    "total_users": users_count or 0,
-                    "total_equipment_listed": equip_count or 0,
-                    "total_labour_services": labour_count or 0,
-                    "total_bookings_made": booking_count or 0
-                }
-                
-                # Send the live database results back to Gemini
-                response = chat.send_message(
-                    {"function_response": {
-                        "name": "get_platform_stats",
-                        "response": stats
-                    }}
-                )
+        # Check if the model decided to call a function (Robust iteration)
+        for part in response.parts:
+            if hasattr(part, 'function_call') and part.function_call:
+                fc = part.function_call
+                if fc.name == "get_platform_stats":
+                    async with AsyncSessionLocal() as session:
+                        users_count = await session.scalar(select(func.count(User.id)))
+                        equip_count = await session.scalar(select(func.count(Equipment.id)))
+                        labour_count = await session.scalar(select(func.count(LabourService.id)))
+                        booking_count = await session.scalar(select(func.count(Booking.id)))
+                    
+                    stats = {
+                        "total_users": users_count or 0,
+                        "total_equipment_listed": equip_count or 0,
+                        "total_labour_services": labour_count or 0,
+                        "total_bookings_made": booking_count or 0
+                    }
+                    
+                    # Send the live database results back to Gemini
+                    response = chat.send_message(
+                        genai.types.Content(
+                            parts=[genai.types.Part.from_function_response(
+                                name="get_platform_stats",
+                                response=stats
+                            )]
+                        )
+                    )
+                    break # Assuming only one function call for now
         
-        return ChatResponse(reply=response.text)
+        # Safety check for response text (handles blocks or empty responses)
+        try:
+            reply_text = response.text
+        except (ValueError, AttributeError) as e:
+            logger.warning(f"Could not extract text from Gemini response: {e}")
+            # Check for safety filter blocks
+            if response.candidates and response.candidates[0].finish_reason == 3: # SAFETY
+                reply_text = "I'm sorry, I cannot answer that query as it violates my safety guidelines. Please ask something related to agriculture."
+            else:
+                reply_text = "I processed your request but couldn't generate a text response. Please try rephrasing."
+
+        return ChatResponse(reply=reply_text)
         
     except Exception as e:
-        logger.error(f"Chatbot Error: {str(e)}")
+        # Log the full exception for debugging
+        logger.exception(f"Chatbot Exception: {str(e)}")
+        
+        # Check for specific Permission Denied (Leaked Key)
+        if "PermissionDenied" in str(e) or "leaked" in str(e).lower():
+            raise HTTPException(status_code=500, detail="The AI service is currently unavailable due to an API key issue. Please contact support.")
+            
         raise HTTPException(status_code=500, detail="Failed to process chat request. Please try again later.")
