@@ -34,7 +34,7 @@ interface Booking {
 export default function ProviderBookings() {
   const queryClient = useQueryClient();
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isPending } = useQuery({
     queryKey: ['providerBookings'],
     queryFn: async () => {
       const res = await apiClient.get<Booking[]>('/provider/bookings');
@@ -124,7 +124,7 @@ export default function ProviderBookings() {
           </motion.h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {isLoading ? (
+            {isPending && !bookings ? (
                <div className="col-span-full py-24 text-center space-y-4">
                   <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
                   <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Authenticating Link...</p>

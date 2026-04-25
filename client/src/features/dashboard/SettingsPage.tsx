@@ -42,29 +42,29 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <motion.div 
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="max-w-5xl mx-auto py-16 px-6 sm:px-10 space-y-12"
-      >
-        {/* Header Section */}
+      <div className="max-w-5xl mx-auto py-16 px-6 sm:px-10 space-y-12">
+        {/* Header Section - Rendered immediately for LCP optimization */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
           <div className="space-y-3">
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em]">
               <AppWindow size={10} strokeWidth={3} />
               Central Configuration Node
-            </motion.div>
-            <motion.h1 variants={itemVariants} className="text-6xl font-heading font-black tracking-tighter leading-none bg-gradient-to-r from-foreground to-foreground/50 bg-clip-text text-transparent italic uppercase">
+            </div>
+            <h1 className="text-6xl font-heading font-black tracking-tighter leading-none bg-gradient-to-r from-foreground to-foreground/50 bg-clip-text text-transparent italic uppercase">
               System <span className="text-primary not-italic">Control</span>
-            </motion.h1>
-            <motion.p variants={itemVariants} className="text-muted-foreground text-lg font-medium max-w-xl">
+            </h1>
+            <p className="text-muted-foreground text-lg font-medium max-w-xl">
               Optimize your marketplace interface, security protocols, and operational preferences.
-            </motion.p>
+            </p>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-12">
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+          className="grid grid-cols-1 gap-12"
+        >
             {/* Admin Infrastructure Override */}
             {isAdmin && (
               <motion.div variants={itemVariants}>
@@ -192,9 +192,9 @@ export default function SettingsPage() {
                <div className="text-center">
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground opacity-30">Agri-tech Systems Configuration v4.8.2-Elite</p>
                </div>
-            </motion.div>
-        </div>
+        </motion.div>
       </motion.div>
+    </div>
     </DashboardLayout>
   );
 }

@@ -65,7 +65,7 @@ interface WithdrawalRequest {
 export default function AdminPayments() {
   const [activeTab, setActiveTab] = useState<'held' | 'payouts' | 'settled'>('held');
 
-  const { data: payments, isLoading, refetch } = useQuery({
+  const { data: payments, isPending, refetch } = useQuery({
     queryKey: ['adminPayments'],
     queryFn: async () => {
       const [analytics, unreleased, released] = await Promise.all([
@@ -118,7 +118,9 @@ export default function AdminPayments() {
     }
   };
 
-  if (isLoading) return <div className="p-10 text-center font-black animate-pulse uppercase tracking-widest text-muted-foreground">Synchronizing Ledger...</div>;
+  if (isPending && !payments) return <div className="h-screen w-full flex items-center justify-center bg-background">
+    <div className="p-10 text-center font-black animate-pulse uppercase tracking-widest text-muted-foreground">Synchronizing Ledger...</div>
+  </div>;
 
   return (
     <DashboardLayout>

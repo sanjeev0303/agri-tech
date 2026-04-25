@@ -8,6 +8,24 @@ from api.deps import require_role
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import time
+
+class SimpleCache:
+    def __init__(self, ttl_seconds=60):
+        self.cache = {}
+        self.ttl = ttl_seconds
+
+    def get(self, key):
+        if key in self.cache:
+            entry = self.cache[key]
+            if time.time() - entry['time'] < self.ttl:
+                return entry['data']
+        return None
+
+    def set(self, key, data):
+        self.cache[key] = {'time': time.time(), 'data': data}
+
+analytics_cache = SimpleCache(ttl_seconds=60)
 
 router = APIRouter()
 
@@ -67,6 +85,10 @@ class UserAnalytics(BaseModel):
 
 @router.get("/admin", response_model=AdminAnalytics)
 async def get_admin_analytics(current_user: User = Depends(require_role([Role.superadmin])), db: AsyncSession = Depends(get_db)):
+    cached = analytics_cache.get("admin")
+    if cached:
+        return cached
+
     # 1. Base Counts
     users_count = await db.scalar(select(func.count()).select_from(User).where(User.role == Role.user))
     providers_count = await db.scalar(select(func.count()).select_from(User).where((User.role == Role.provider) | (User.role == Role.labour)))
@@ -142,7 +164,7 @@ async def get_admin_analytics(current_user: User = Depends(require_role([Role.su
         {"subject": "Coverage", "A": 90, "fullMark": 100}
     ]
     
-    return {
+    result = {
         "total_users": users_count or 0,
         "total_providers": providers_count or 0,
         "total_equipment": equipments_count or 0,
@@ -156,9 +178,16 @@ async def get_admin_analytics(current_user: User = Depends(require_role([Role.su
         "resource_distribution": resource_distribution,
         "platform_radar": platform_radar
     }
+    analytics_cache.set("admin", result)
+    return result
 
 @router.get("/provider", response_model=ProviderAnalytics)
 async def get_provider_analytics(current_user: User = Depends(require_role([Role.provider, Role.labour])), db: AsyncSession = Depends(get_db)):
+    cache_key = f"provider_{current_user.id}"
+    cached = analytics_cache.get(cache_key)
+    if cached:
+        return cached
+
     # 1. Resource Counts
     equipments = await db.scalar(select(func.count()).select_from(Equipment).where(Equipment.owner_id == current_user.id))
     labours = await db.scalar(select(func.count()).select_from(LabourService).where(LabourService.provider_id == current_user.id))
@@ -207,7 +236,7 @@ async def get_provider_analytics(current_user: User = Depends(require_role([Role
         for tx in tx_res.scalars().all()
     ]
     
-    return {
+    result = {
         "active_equipment": equipments or 0,
         "active_labour": labours or 0,
         "pending_bookings": pending_bookings,
@@ -216,6 +245,8 @@ async def get_provider_analytics(current_user: User = Depends(require_role([Role
         "final_earnings": float(final_res or 0.0),
         "recent_transactions": recent_txs
     }
+    analytics_cache.set(cache_key, result)
+    return result
 
 @router.get("/user", response_model=UserAnalytics)
 async def get_user_analytics(current_user: User = Depends(require_role([Role.user])), db: AsyncSession = Depends(get_db)):

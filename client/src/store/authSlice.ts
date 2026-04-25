@@ -1,10 +1,18 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+interface Profile {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  image_url?: string;
+}
+
 interface User {
   id: number;
   email: string;
   role: 'superadmin' | 'provider' | 'labour' | 'user';
   is_active: boolean;
+  profile?: Profile;
 }
 
 interface AuthState {
@@ -32,6 +40,11 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       localStorage.setItem('token', action.payload.token);
     },
+    updateUser: (state: AuthState, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
     logout: (state: AuthState) => {
       state.user = null;
       state.token = null;
@@ -41,5 +54,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, logout, updateUser } = authSlice.actions;
 export default authSlice.reducer;

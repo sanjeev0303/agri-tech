@@ -29,13 +29,19 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
       
-      const meRes = await apiClient.get('/auth/me', {
-        headers: { Authorization: `Bearer ${res.data.access_token}`}
-      });
-
-      dispatch(setCredentials({ user: meRes.data, token: res.data.access_token }));
+      let user = res.data.user;
       
-      const role = meRes.data.role;
+      // Fallback in case the server doesn't return user (backward compatibility)
+      if (!user) {
+        const meRes = await apiClient.get('/auth/me', {
+          headers: { Authorization: `Bearer ${res.data.access_token}`}
+        });
+        user = meRes.data;
+      }
+
+      dispatch(setCredentials({ user, token: res.data.access_token }));
+      
+      const role = user.role;
       if (role === 'superadmin') navigate('/dashboard/admin');
       else if (role === 'employee') navigate('/dashboard/employee');
       else navigate('/dashboard/user');

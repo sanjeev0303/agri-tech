@@ -19,7 +19,7 @@ interface BookingData {
 export default function AdminBookings() {
   const queryClient = useQueryClient();
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isPending } = useQuery({
     queryKey: ['adminBookings'],
     queryFn: async () => {
       const res = await apiClient.get<BookingData[]>('/admin/bookings');
@@ -63,10 +63,10 @@ export default function AdminBookings() {
         </header>
 
         <div className="bg-card border-2 border-muted/50 rounded-[2.5rem] shadow-2xl overflow-hidden">
-          {isLoading ? (
+          {isPending && !bookings ? (
             <div className="p-24 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-6"></div>
-              <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Loading bookings...</p>
+              <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">Synchronizing Central Ledger...</p>
             </div>
           ) : (
             <div className="overflow-x-auto">

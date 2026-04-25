@@ -41,7 +41,7 @@ interface Booking {
 export default function UserBookings() {
   const [isProcessing, setIsProcessing] = useState<number | null>(null);
 
-  const { data: bookings, isLoading, refetch } = useQuery({
+  const { data: bookings, isPending, refetch } = useQuery({
     queryKey: ['userBookings'],
     queryFn: async () => {
       const res = await apiClient.get<Booking[]>('/user/bookings');
@@ -190,7 +190,7 @@ export default function UserBookings() {
           </motion.h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {isLoading ? (
+            {isPending && !bookings ? (
                <div className="col-span-full py-24 text-center space-y-4">
                   <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
                   <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Synchronizing Records...</p>
@@ -204,7 +204,7 @@ export default function UserBookings() {
                   <p className="text-xs text-muted-foreground/50 font-bold uppercase tracking-widest mt-2">Zero field deployments detected in global history.</p>
                </div>
             ) : (
-              bookings?.map((b) => (
+               bookings?.map((b) => (
                 <BookingCard 
                   key={b.id} 
                   booking={b} 

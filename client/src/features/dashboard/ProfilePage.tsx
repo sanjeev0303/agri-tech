@@ -1,7 +1,8 @@
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '../../api/axios';
 import type { RootState } from '../../store';
+import { updateUser } from '../../store/authSlice';
 import DashboardLayout from '../../components/DashboardLayout';
 import { 
   User, 
@@ -21,14 +22,16 @@ import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 export default function ProfilePage() {
+  const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const { data: profile, isLoading, refetch } = useQuery({
+  const { data: profile, isPending, refetch } = useQuery({
     queryKey: ['userProfile'],
     queryFn: async () => {
       const res = await apiClient.get('/user/profile');
       return res.data;
-    }
+    },
+    placeholderData: user?.profile
   });
 
   const uploadMutation = useMutation({
@@ -40,7 +43,10 @@ export default function ProfilePage() {
       });
       return res.data;
     },
-    onSuccess: () => refetch()
+    onSuccess: (data) => {
+      dispatch(updateUser({ profile: data }));
+      refetch();
+    }
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,26 +68,12 @@ export default function ProfilePage() {
     visible: { y: 0, opacity: 1 }
   };
 
-  if (isLoading) return (
-    <div className="h-screen w-full flex items-center justify-center bg-background">
-      <div className="space-y-4 text-center">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground animate-pulse italic">Synchronizing Identity Node...</p>
-      </div>
-    </div>
-  );
-
   return (
     <DashboardLayout>
-      <motion.div 
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="max-w-5xl mx-auto py-16 px-6 sm:px-10"
-      >
-        {/* Header / Avatar Section */}
+      <div className="max-w-5xl mx-auto py-16 px-6 sm:px-10">
+        {/* Header / Avatar Section - Rendered immediately for LCP optimization */}
         <header className="mb-20 text-center relative">
-          <motion.div variants={itemVariants} className="relative inline-block group">
+          <div className="relative inline-block group">
             {/* Ambient Glow */}
             <div className="absolute inset-0 bg-primary/20 blur-[50px] rounded-full group-hover:bg-primary/40 transition-all duration-700" />
             
@@ -90,7 +82,7 @@ export default function ProfilePage() {
                   {profile?.image_url ? (
                     <img src={profile.image_url} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-7xl font-black text-primary italic leading-none">{user?.email[0].toUpperCase()}</span>
+                    <span className="text-7xl font-black text-primary italic leading-none">{user?.email?.[0].toUpperCase() || 'U'}</span>
                   )}
                   <div className="absolute inset-0 bg-primary/5 group-hover:bg-transparent transition-colors" />
                </div>
@@ -105,26 +97,37 @@ export default function ProfilePage() {
                 </div>
               )}
             </label>
-          </motion.div>
+          </div>
 
-          <motion.div variants={itemVariants} className="mt-8 space-y-3">
+          <div className="mt-8 space-y-3">
             <h1 className="text-6xl font-heading font-black tracking-tighter leading-none bg-gradient-to-r from-foreground to-foreground/50 bg-clip-text text-transparent italic uppercase">
-              {user?.email.split('@')[0]}
+              {user?.email?.split('@')[0] || 'User Node'}
             </h1>
             <div className="flex items-center justify-center gap-4">
               <span className="px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                 <Shield size={10} strokeWidth={3} />
-                {user?.role} ACCESS
+                {user?.role || 'GUEST'} ACCESS
               </span>
               <span className="px-4 py-1.5 bg-muted rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2 border border-muted-foreground/10">
                 <Activity size={10} strokeWidth={3} />
                 Global Verified
               </span>
             </div>
-          </motion.div>
+          </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {isPending && !profile ? (
+          <div className="py-20 text-center space-y-4">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground animate-pulse italic">Synchronizing Identity Node...</p>
+          </div>
+        ) : (
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="grid grid-cols-1 md:grid-cols-2 gap-10"
+          >
           {/* Account Integrity Panel */}
           <motion.div variants={itemVariants} className="bg-card border-2 border-muted/50 rounded-[3.5rem] p-12 shadow-2xl shadow-primary/5 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-10 opacity-[0.03] text-primary group-hover:scale-110 transition-transform pointer-events-none">
@@ -172,7 +175,8 @@ export default function ProfilePage() {
                </button>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
+      )}
 
         {/* System Activity Summary (Extra Section for Premium Feel) */}
         <motion.div variants={itemVariants} className="mt-10 p-12 bg-primary/5 border-2 border-primary/20 rounded-[3.5rem] flex flex-col md:flex-row items-center justify-between gap-8 group">
@@ -190,7 +194,7 @@ export default function ProfilePage() {
               <p className="text-5xl font-black font-heading tracking-tighter">9.8</p>
            </div>
         </motion.div>
-      </motion.div>
+      </div>
     </DashboardLayout>
   );
 }

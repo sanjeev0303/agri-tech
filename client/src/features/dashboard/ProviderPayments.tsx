@@ -27,7 +27,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProviderPayments() {
-  const { data: payments, isLoading, refetch } = useQuery({
+  const { data: payments, isPending, refetch } = useQuery({
     queryKey: ['providerPayments'],
     queryFn: async () => {
       const [analytics, wallet, bank, withdrawals] = await Promise.all([
@@ -97,7 +97,7 @@ export default function ProviderPayments() {
     visible: { y: 0, opacity: 1 }
   };
 
-  if (isLoading) return (
+  if (isPending && !payments) return (
      <div className="h-screen w-full flex items-center justify-center bg-background">
         <div className="space-y-4 text-center">
            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
