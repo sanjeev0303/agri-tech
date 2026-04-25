@@ -103,11 +103,16 @@ async def chat_with_bot(request: ChatRequest):
                     
                     # Send the live database results back to Gemini
                     response = chat.send_message(
-                        genai.types.Content(
-                            parts=[genai.types.Part.from_function_response(
-                                name="get_platform_stats",
-                                response=stats
-                            )]
+                        genai.protos.Content(
+                            role='function',
+                            parts=[
+                                genai.protos.Part(
+                                    function_response=genai.protos.FunctionResponse(
+                                        name="get_platform_stats",
+                                        response=stats
+                                    )
+                                )
+                            ]
                         )
                     )
                     break # Assuming only one function call for now
