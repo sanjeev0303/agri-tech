@@ -177,7 +177,7 @@ export default function AdminPayments() {
           </div>
           <div className="h-[350px] w-full relative">
             {payments?.user_growth && (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={350} debounce={100}>
                 <AreaChart data={payments.user_growth}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">

@@ -77,7 +77,7 @@ def _configure_model(system_instruction: str) -> genai.GenerativeModel:
         )
     genai.configure(api_key=settings.GEMINI_API_KEY)
     return genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
+        model_name="gemini-3-flash-preview",
         system_instruction=system_instruction,
     )
 
@@ -157,7 +157,7 @@ async def chat_with_bot(request: ChatRequest):
             formatted_history.append({"role": role, "parts": [msg.content]})
 
         chat = model.start_chat(history=formatted_history)
-        response = chat.send_message(latest_message)
+        response = await chat.send_message_async(latest_message)
 
         reply_text = _extract_text(response)
         return ChatResponse(reply=reply_text)
@@ -165,20 +165,7 @@ async def chat_with_bot(request: ChatRequest):
     except HTTPException:
         raise
     except Exception as e:
-        err_str = str(e)
-        logger.exception(f"Chatbot Exception: {err_str}")
-
-        if "PermissionDenied" in err_str or "403" in err_str or "leaked" in err_str.lower():
-            raise HTTPException(
-                status_code=500,
-                detail="AI service unavailable due to an API key issue. Please contact support."
-            )
-        if "not found" in err_str.lower() or "404" in err_str:
-            raise HTTPException(
-                status_code=500,
-                detail="AI model unavailable. Please try again later."
-            )
-
+        logger.exception(f"Chatbot Exception: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail="Failed to process chat request. Please try again later."

@@ -189,7 +189,7 @@ export default function ProviderDashboard() {
 
               {/* Mini Chart Area */}
               <div className="h-[120px] w-full mt-10 -mx-10 rounded-b-[3rem] overflow-hidden opacity-50">
-                <ResponsiveContainer width="100%" height="100%" minHeight={120}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={120} debounce={100}>
                   <AreaChart data={[
                     {v: 40}, {v: 70}, {v: 45}, {v: 90}, {v: 65}, {v: 110}, {v: 85}
                   ]}>

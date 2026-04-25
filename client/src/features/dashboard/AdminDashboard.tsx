@@ -111,7 +111,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="h-[350px] w-full relative">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={350} debounce={100}>
               <AreaChart data={analytics?.user_growth}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
               <TrendingUp className="text-primary" size={24} />
             </div>
             <div className="h-[350px] w-full relative">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={350} debounce={100}>
                 <AreaChart data={analytics?.user_growth}>
                   <defs>
                     <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
               <PieChartIcon className="text-primary" size={24} />
             </div>
             <div className="h-[300px] w-full mt-4 relative">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={350} debounce={100}>
                 <PieChart>
                   <Pie
                     data={analytics?.resource_distribution}
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
               <BarChart3 className="text-primary" size={24} />
             </div>
             <div className="h-[350px] w-full relative">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={350} debounce={100}>
                 <BarChart data={analytics?.resource_distribution}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700}} dy={12} />
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
               <Shield size={24} className="text-primary" />
             </div>
             <div className="h-[400px] w-full relative">
-               <ResponsiveContainer width="100%" height="100%" minWidth={0} debounce={100}>
+               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={350} debounce={100}>
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={analytics?.platform_radar}>
                   <PolarGrid stroke="#E2E8F0" />
                   <PolarAngleAxis dataKey="subject" tick={{fontSize: 10, fontWeight: 900, fill: '#64748b'}} />
