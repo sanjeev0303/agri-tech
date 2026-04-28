@@ -54,7 +54,7 @@ app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
-    allow_origin_regex=r"https://agri-tech-.*\.vercel\.app",
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.netlify\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,7 +64,10 @@ app.add_middleware(
 async def global_exception_handler(request: Request, exc: Exception):
     origin = request.headers.get("origin")
     allowed = settings.cors_origins_list
-    allow_origin = origin if origin in allowed else allowed[0]
+    # If origin is allowed (via list or regex), use it; otherwise fallback to first allowed origin
+    import re
+    is_regex_match = any(re.match(pattern, origin) for pattern in [r"https://.*\.vercel\.app", r"https://.*\.netlify\.app"]) if origin else False
+    allow_origin = origin if (origin in allowed or is_regex_match) else (allowed[0] if allowed else "*")
     
     return JSONResponse(
         status_code=500,
