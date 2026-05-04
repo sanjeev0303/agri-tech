@@ -84,9 +84,9 @@ function HeroSection() {
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/10 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/5 blur-[120px] rounded-full -translate-x-1/2 translate-y-1/2" />
       <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay">
-        <img 
-          src="https://images.pexels.com/photos/2132250/pexels-photo-2132250.jpeg?auto=compress&cs=tinysrgb&w=1600" 
-          alt="Agriculture backdrop" 
+        <img
+          src="https://images.pexels.com/photos/2132250/pexels-photo-2132250.jpeg?auto=compress&cs=tinysrgb&w=1600"
+          alt="Agriculture backdrop"
           className="w-full h-full object-cover grayscale"
         />
       </div>
@@ -310,9 +310,9 @@ function BentoMarketplace() {
             </motion.button>
             {/* Background Image Abstract */}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none">
-              <img 
-                src="https://images.pexels.com/photos/2581600/pexels-photo-2581600.jpeg?auto=compress&cs=tinysrgb&w=800" 
-                alt="Fleet background" 
+              <img
+                src="https://images.pexels.com/photos/2581600/pexels-photo-2581600.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Fleet background"
                 className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
               />
             </div>
@@ -323,9 +323,9 @@ function BentoMarketplace() {
 
           <div className="md:col-span-1 lg:col-span-2 glass rounded-[3rem] p-10 flex flex-col justify-end group transition-all hover:bg-primary hover:text-primary-foreground relative overflow-hidden">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-700 pointer-events-none">
-              <img 
-                src="https://images.pexels.com/photos/8413125/pexels-photo-8413125.jpeg?auto=compress&cs=tinysrgb&w=800" 
-                alt="Personnel background" 
+              <img
+                src="https://images.pexels.com/photos/8413125/pexels-photo-8413125.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Personnel background"
                 className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000 grayscale"
               />
             </div>
@@ -368,9 +368,9 @@ function AnalyticsSection() {
     <section className="py-32 bg-slate-950 text-white relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[40%] h-full bg-emerald-500/5 -skew-x-12 translate-x-20" />
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay">
-        <img 
-          src="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1600" 
-          alt="Tech background" 
+        <img
+          src="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1600"
+          alt="Tech background"
           className="w-full h-full object-cover"
         />
       </div>
@@ -483,14 +483,14 @@ function ProcessJourney() {
             <div key={idx} className="relative group">
             <div className="p-10 rounded-[3rem] bg-background border border-border/50 shadow-xl transition-all hover:-translate-y-4 hover:border-primary/30 text-center space-y-6 relative z-10 overflow-hidden">
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.07] transition-opacity duration-700 pointer-events-none">
-                  <img 
+                  <img
                     src={[
                       "https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=400",
                       "https://images.pexels.com/photos/1714208/pexels-photo-1714208.jpeg?auto=compress&cs=tinysrgb&w=400",
                       "https://images.pexels.com/photos/2132177/pexels-photo-2132177.jpeg?auto=compress&cs=tinysrgb&w=400",
                       "https://images.pexels.com/photos/3183183/pexels-photo-3183183.jpeg?auto=compress&cs=tinysrgb&w=400"
-                    ][idx]} 
-                    alt={step.title} 
+                    ][idx]}
+                    alt={step.title}
                     className="w-full h-full object-cover grayscale"
                   />
                 </div>
@@ -536,7 +536,11 @@ function EquipmentSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {[1, 2, 3].map((i) => (
+          {[
+            "https://imgs.search.brave.com/QpC_WtCeNmULCVpUmKDwWZsVf1F4Txo7w-ax9qEPndE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTE4/OTc0OTgzNS9waG90/by9pb3Qtc21hcnQt/YWdyaWN1bHR1cmUt/aW5kdXN0cnktNC0w/LWNvbmNlcHQtZHJv/bmUtdXNlLWZvci1z/cHJheS1hLXdhdGVy/LWZlcnRpbGl6ZXIt/b3ItY2hlbWljYWwu/anBnP3M9NjEyeDYx/MiZ3PTAmaz0yMCZj/PXRFR294RUFNUHRE/ckhZNjRJeEhHV0lT/U05mZjU0YkRvcFA5/VTZ0U01GUWs9",
+            "https://imgs.search.brave.com/Xz76UYfPwBeVWZaZ4vLuLC65KL8jVBNQcAcx2dzBlqU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTM1/NzI1NjkzMS9waG90/by9hdXRvbWF0ZWQt/c21hcnQtZmFybWlu/Zy1mYWNpbGl0eS11/c2luZy1yb2JvdGlj/cy5qcGc_cz02MTJ4/NjEyJnc9MCZrPTIw/JmM9aXk2M000bEc0/STFGSTBmaUpNT054/S1gxR2c4UWtnYlB6/bjlCSXZqU0k5MD0",
+            "https://imgs.search.brave.com/bo7f0cDuR82bIDDMcg-oXCqlFPXZhlRMxdfthLV7npg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTMz/MTY0MjE5Ni9waG90/by9oaS10ZWNoLWZh/cm1pbmcuanBnP3M9/NjEyeDYxMiZ3PTAm/az0yMCZjPUJHaWRT/SzVQTzdWNjk2dTFB/eWhrcmd4U0kyTHNP/T3d5XzBwRk5Pc2JF/U2s9"
+          ].map((img, i) => (
             <motion.div
               key={i}
               whileHover={{ y: -10 }}
@@ -544,8 +548,8 @@ function EquipmentSection() {
             >
               <div className="aspect-[4/5] rounded-[2rem] overflow-hidden mb-8 bg-muted relative">
                 <img
-                  src="https://images.pexels.com/photos/2581600/pexels-photo-2581600.jpeg?auto=compress&cs=tinysrgb&w=800"
-                  alt="Tractor"
+                  src={img}
+                  alt={`Alpha Series Gen-${i + 1}`}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80"
                 />
                 <div className="absolute top-4 right-4 bg-background/80 backdrop-blur px-3 py-1 rounded-full text-[8px] font-black tracking-widest text-primary border border-primary/20">
@@ -553,7 +557,7 @@ function EquipmentSection() {
                 </div>
               </div>
               <h4 className="text-2xl font-black tracking-tight mb-2">
-                Alpha Series Gen-{i}
+                Alpha Series Gen-{i + 1}
               </h4>
               <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest text-muted-foreground italic mb-6">
                 <span>Hiring Efficiency Score: 98%</span>
@@ -611,9 +615,9 @@ function GlobalImpact() {
 
         <div className="mt-32 relative h-[400px] w-full max-w-4xl mx-auto rounded-[4rem] overflow-hidden glass p-4">
           <div className="absolute inset-0 opacity-[0.15]">
-            <img 
-              src="https://images.pexels.com/photos/110854/pexels-photo-110854.jpeg?auto=compress&cs=tinysrgb&w=1200" 
-              alt="Global Network" 
+            <img
+              src="https://images.pexels.com/photos/110854/pexels-photo-110854.jpeg?auto=compress&cs=tinysrgb&w=1200"
+              alt="Global Network"
               className="w-full h-full object-cover grayscale"
             />
             <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]" />
@@ -934,9 +938,9 @@ function TechEcosystem() {
         <div className="relative aspect-square w-full max-w-2xl mx-auto flex items-center justify-center">
           {/* Background Technology Image */}
           <div className="absolute inset-0 opacity-10 pointer-events-none group">
-            <img 
-              src="https://images.pexels.com/photos/14138670/pexels-photo-14138670.jpeg?auto=compress&cs=tinysrgb&w=800" 
-              alt="Agri-Drone technology" 
+            <img
+              src="https://images.pexels.com/photos/14138670/pexels-photo-14138670.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Agri-Drone technology"
               className="w-full h-full object-cover rounded-[4rem] group-hover:scale-105 transition-transform duration-1000 grayscale"
             />
             <div className="absolute inset-0 bg-background/40 backdrop-blur-sm" />
@@ -1094,9 +1098,9 @@ function EfficiencyIntelligence() {
   return (
     <section className="py-32 bg-secondary/20 relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale">
-        <img 
-          src="https://images.pexels.com/photos/2132177/pexels-photo-2132177.jpeg?auto=compress&cs=tinysrgb&w=1600" 
-          alt="Field intelligence" 
+        <img
+          src="https://images.pexels.com/photos/2132177/pexels-photo-2132177.jpeg?auto=compress&cs=tinysrgb&w=1600"
+          alt="Field intelligence"
           className="w-full h-full object-cover"
         />
       </div>
